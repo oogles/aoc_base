@@ -49,3 +49,7 @@ For day 1::
 For day 6 using sample data::
 
     python3 run.py 6 --sample
+
+For all puzzles:
+
+    python3 run.py --all
