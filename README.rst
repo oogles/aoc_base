@@ -1,5 +1,5 @@
-Advent of Code 2019
-===================
+Advent of Code
+==============
 
 Structure
 ---------
@@ -41,6 +41,11 @@ Running solvers
 ---------------
 
 To run a puzzle solver, use the ``run.py`` script found in the root directory.
-E.g. For day 1::
+
+For day 1::
     
-    python3 run 1
+    python3 run.py 1
+
+For day 6 using sample data::
+
+    python3 run.py 6 --sample

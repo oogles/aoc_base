@@ -16,8 +16,9 @@ if __name__ == '__main__':
         print('The "day" argument must be an integer between 1 and 25.')
         sys.exit(1)
     
-    # Extract and validate "sample" argument
-    sample = False
+    # Check for "--sample" flag
+    flags = sys.argv[2:]
+    sample = '--sample' in flags
     
     # Import and execute puzzle solver
     try:
