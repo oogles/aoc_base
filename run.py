@@ -17,10 +17,10 @@ def get_module(day):
     return importlib.import_module(f'puzzles.day{day:02d}.puzzle')
 
 
-def solve_puzzle(module):
+def solve_puzzle(module, sample, v=2):
     
     try:
-        puzzle = module.P(sample=sample)
+        puzzle = module.P(sample=sample, verbosity=v)
     except AttributeError as e:
         print(e)
         print('You should fix that.')
@@ -43,6 +43,10 @@ if __name__ == '__main__':
     
     if day == '--all':
         # Import and execute puzzle solver for all days in the calendar
+        if sample:
+            print('\n*** USING SAMPLE DATA ***\n')
+        
+        print('-' * 50)
         for day in range(1, 25):
             try:
                 module = get_module(day)
@@ -50,7 +54,9 @@ if __name__ == '__main__':
                 # No puzzle for day, presumably no further puzzles either
                 break
             
-            solve_puzzle(module)
+            print(f'== DAY {day} ==')
+            solve_puzzle(module, sample, v=1)
+            print('-' * 50)
     else:
         try:
             day = validate_day(day)
@@ -66,4 +72,4 @@ if __name__ == '__main__':
             print(f'Have you unlocked the day {day} puzzle yet?')
             sys.exit(1)
         
-        solve_puzzle(module)
+        solve_puzzle(module, sample, v=2)
