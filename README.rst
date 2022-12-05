@@ -47,13 +47,13 @@ At their simplest, ``Puzzle`` subclasses need only override the ``_part1()`` and
             
             pass
 
-The ``input_data`` argument to these methods is, by default, a ``list`` of each line in the input file. This is because ``Puzzle.input_delimiter`` is ``'\n'`` by default. If the input is instead a single line of comma-separated values, the following can be used to cause ``input_data`` to be read in as a list of those values::
+The ``input_data`` argument to these methods is, by default, a ``list`` of each line in the input file. This is because ``Puzzle.input_delimiter`` is ``'\n'`` by default. If the input is instead, for example, a single line of comma-separated values, the following can be used to cause ``input_data`` to be read in as a list of those values::
 
     class P(Puzzle):
         
         input_delimiter = ','
 
-The same is true for other delimiters. Often it is necessary to further process in the input data in some way, e.g. convert each item to an integer. If such processing is unique to only one part of the puzzle, it can and should be done as part of the solver method for that part (i.e. in ``_part1()`` or ``_part2()``). However, if it is common to both parts, it need only be done once. The following example converts all input items to integers before providing the result as the ``input_data`` argument to the solver methods::
+The same is true for other delimiters. Often it is necessary to further process the input data in some way, e.g. convert each item to an integer. If such processing is unique to only one part of the puzzle, it can and should be done as part of the solver method for that part (i.e. in ``_part1()`` or ``_part2()``). However, if it is common to both parts, it need only be done once, and that can be done in the ``process_input_item()`` method. The following example converts all input items to integers before providing the result as the ``input_data`` argument to the solver methods::
 
     class P(Puzzle):
         
@@ -61,7 +61,9 @@ The same is true for other delimiters. Often it is necessary to further process 
             
             return int(input_item)
 
-If ``input_data`` should not be a ``list`` at all, ``input_delimiter`` can be set to ``None``. In this case, the ``input_data`` argument will be the raw data read from the input file. Again, if this data should be processed in some way that is common to both parts of the puzzle, it can be done once and the result provided to each of the solver methods::
+If ``input_data`` should not be a ``list`` at all, ``input_delimiter`` can be set to ``None``. In this case, the ``input_data`` argument will be the raw data read from the input file.
+
+If the *entire* dataset needs to have some common processing applied to it before being passed to the solvers for each part of the puzzle, that can be done in the ``process_input_data()`` method. This method is passed the result of all previous processing - that is, applying ``input_delimiter`` and running ``process_input_item()`` over each item. In this way, it can apply a final processing pass to either the previously-processed data, or to the raw input data (if ``input_delimiter`` is ``None``). The following example shows processing raw input data to generate a result to be provided to each of the solver methods::
 
     class P(Puzzle):
         
