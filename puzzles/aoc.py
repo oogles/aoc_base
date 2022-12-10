@@ -1,3 +1,4 @@
+import copy
 import inspect
 import os
 import time
@@ -49,31 +50,39 @@ class Puzzle:
     
     def get_input(self):
         
+        start = time.time()
+        
         input_file = self.get_input_file_name()
         delimiter = self.input_delimiter
         parse = self.parse_string
         process_item = self.process_input_item
         
+        input_size = 0
+        item_type = 'bytes'
+        if delimiter == '\n':
+            item_type = 'lines'
+        elif delimiter:
+            item_type = 'items'
+        
         with open(input_file, 'r') as f:
-            if delimiter == '\n':
-                # Optionally trim whitespace from and process each line in the input
-                # file, skipping any blank lines
-                input_data = []
-                
-                for line in f.readlines():
-                    line = parse(line)
-                    if line:
-                        input_data.append(process_item(line))
+            input_data = parse(f.read())  # optionally trim whitespace (e.g. newlines)
+            
+            if delimiter:
+                # Optionally trim whitespace from and process each item in the
+                # raw input data after applying the configured delimiter
+                input_data = [process_item(parse(item)) for item in input_data.split(delimiter)]
+                input_size = len(input_data)
             else:
-                input_data = parse(f.read())  # optionally trim whitespace (e.g. newlines)
-                
-                if delimiter:
-                    # Optionally trim whitespace from and process each item in the
-                    # raw input data after applying the configured delimiter
-                    input_data = [process_item(parse(item)) for item in input_data.split(delimiter)]
-                
-                # Apply any overall processing of the input data
-                input_data = self.process_input_data(input_data)
+                # No delimiter in use, just report the size of the input file
+                # in bytes
+                input_size = sys.getsizeof(input_data)
+            
+            # Apply any overall processing of the input data
+            input_data = self.process_input_data(input_data)
+        
+        t = time.time() - start
+        
+        print(f'Raw input: {input_size} {item_type} (processed into {type(input_data)}) [{t:.6f}s]')
         
         return input_data
     
@@ -81,50 +90,28 @@ class Puzzle:
         
         v = self.verbosity
         max_v = v > 1
-        line_endings = '\n' if max_v else ''
         
         # Get input
         if max_v:
             sample = '**SAMPLE** ' if self.sample else ''
-            print('=' * 50, f'\n\nProcessing {sample}', end='')
+            print('=' * 50, f'\n\nReading {sample}input...')
         
-        print('Input...  ', end=line_endings)
-        
-        start = time.time()
         try:
             input_data = self.get_input()
         except FileNotFoundError:
             print(f'No input data file found (looked in {self.get_input_file_name()}).')
             return
         
-        t = time.time() - start
-        
-        if self.input_delimiter == '\n':
-            input_desc = f'has {len(input_data)} lines'
-        elif self.input_delimiter:
-            input_desc = f'has {len(input_data)} items'
-        else:
-            size = sys.getsizeof(input_data)
-            input_desc = f'is {size} bytes'
-        
-        if max_v:
-            print('Input ', end='')
-        
-        print(f'{input_desc} ({type(input_data)}) [{t:.6f}s]')
-        
         # Run solvers
         for part, solver in solvers:
-            if self.input_delimiter:
-                # Copy the data so each part is free to manipulate it without
-                # affecting subsequent parts
-                part_input_data = input_data[:]
-            else:
-                part_input_data = input_data
+            # Copy the data so each part is free to manipulate it without
+            # affecting subsequent parts
+            part_input_data = copy.deepcopy(input_data)
             
             if max_v:
                 print('\nSolving ', end='')
             
-            print(f'Part {part}... ', end=line_endings)
+            print(f'Part {part}... ', end='\n' if max_v else '')
             
             start = time.time()
             solution = solver(part_input_data)
